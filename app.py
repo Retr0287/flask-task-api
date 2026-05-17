@@ -107,6 +107,27 @@ def delete_tasks(task_id):
     cursor.execute("DELETE FROM task WHERE id=%s", (task_id,))
     users_db.commit()
     return jsonify({"same tasks":"task was deleted"})
+
+@app.route("/tasks/<int:task_id>", methods=['PATCH'])
+def update_tasks(task_id):
+    user_id=get_user_id()
+    body = request.get_json()
+    cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
+    task=cursor.fetchone()
+    if not task:
+        return jsonify ({"error": "task not found"})
+    if task["user_id"]!=user_id:
+        return jsonify ({"error": "access denied"})
+
+    if "title" not in  body:
+        return jsonify({"error": "title required"})
+    
+    cursor.execute(
+    "UPDATE task SET title = %s WHERE id=%s",
+    (body["title"], task_id))
+    users_db.commit()
+    return jsonify({"succses":"tittle was update"})
+
         
 if __name__ == "__main__": 
     app.run(debug=True)
