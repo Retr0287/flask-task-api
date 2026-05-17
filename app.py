@@ -126,7 +126,7 @@ def update_tasks(task_id):
     "UPDATE task SET title = %s WHERE id=%s",
     (body["title"], task_id))
     users_db.commit()
-    return jsonify({"succses":"tittle was update"})
+    return jsonify({"success": "title updated"})
 
         
 if __name__ == "__main__": 
