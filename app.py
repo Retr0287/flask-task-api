@@ -1,19 +1,12 @@
-import mysql.connector 
 import jwt
 import os
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 load_dotenv()
-
-SECRET_KEY=os.getenv("SECRET_KEY")
+from db import cursor, users_db
+from auth import get_user_id
 app=Flask(__name__)
-users_db = mysql.connector.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME")
-)
-cursor=users_db.cursor(dictionary=True)
+SECRET_KEY=os.getenv("SECRET_KEY")
 
 #REGISTER
 @app.route("/register", methods=['POST'])
@@ -54,23 +47,7 @@ def search_user():
     return jsonify({"token": token})
 
 
-#TASK
-def get_user_id():
-    auth=request.headers.get("Authorization")
-    if not auth:
-        return jsonify({"error":"no token"})
-    elif not auth.startswith("Bearer "):
-        return jsonify({"error": "invalid token"})
-    
-    token=auth.split(None, 1)[1]
-    
-    try:
-        data=jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-    except:
-        return jsonify({"error": "invalid token"})
-    
-    return data["user_id"]
-    
+#TASK    
 @app.route("/tasks", methods=['POST'])
 def add_task():
     user_id=get_user_id()
