@@ -20,7 +20,7 @@ def add_user():
 
     users_db.commit()
 
-    return jsonify({"user":"added"})
+    return jsonify({"user":"added"}), 201
 
 #LOGIN
 @app.route('/login', methods=['POST'])
@@ -35,16 +35,16 @@ def search_user():
     user = cursor.fetchone()
 
     if not user:
-        return jsonify({"error": "user not found"})
+        return jsonify({"error": "user not found"}), 404
 
     if user["password"] !=data["password"]:
-        return jsonify({"error": "wrong password"})
+        return jsonify({"error": "wrong password"}), 403
     
     payload = {
     "user_id": user["id"]
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-    return jsonify({"token": token})
+    return jsonify({"token": token}), 200
 
 
 #TASK    
@@ -58,7 +58,7 @@ def add_task():
     )
     users_db.commit()
 
-    return jsonify({"message": "task created"})
+    return jsonify({"message": "task created"}), 201
 
 @app.route("/tasks", methods=['GET' ])
 def get_tasks():
@@ -69,7 +69,7 @@ def get_tasks():
         (user_id,)
     )
     tasks = cursor.fetchall()
-    return jsonify(tasks)
+    return jsonify(tasks), 200
 
 @app.route("/task/<int:task_id>", methods=['DELETE'])
 def delete_tasks(task_id):
@@ -77,13 +77,13 @@ def delete_tasks(task_id):
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
     task=cursor.fetchone()
     if not task:
-        return jsonify ({"error": "task not found"})
+        return jsonify ({"error": "task not found"}), 404
     if task["user_id"]!=user_id:
-        return jsonify ({"error": "access denied"})
+        return jsonify ({"error": "access denied"}), 403
 
     cursor.execute("DELETE FROM task WHERE id=%s", (task_id,))
     users_db.commit()
-    return jsonify({"same tasks":"task was deleted"})
+    return jsonify({"same tasks":"task was deleted"}), 200
 
 @app.route("/tasks/<int:task_id>", methods=['PATCH'])
 def update_tasks(task_id):
@@ -92,18 +92,18 @@ def update_tasks(task_id):
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
     task=cursor.fetchone()
     if not task:
-        return jsonify ({"error": "task not found"})
+        return jsonify ({"error": "task not found"}), 404
     if task["user_id"]!=user_id:
-        return jsonify ({"error": "access denied"})
+        return jsonify ({"error": "access denied"}), 403
 
     if "title" not in  body:
-        return jsonify({"error": "title required"})
+        return jsonify({"error": "title required"}), 400
     
     cursor.execute(
     "UPDATE task SET title = %s WHERE id=%s",
     (body["title"], task_id))
     users_db.commit()
-    return jsonify({"success": "title updated"})
+    return jsonify({"success": "title updated"}), 200
 
         
 if __name__ == "__main__": 
