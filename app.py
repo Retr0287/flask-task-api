@@ -1,5 +1,6 @@
 import jwt
 import os
+import bcrypt
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 load_dotenv()
@@ -12,10 +13,14 @@ SECRET_KEY=os.getenv("SECRET_KEY")
 @app.route("/register", methods=['POST'])
 def add_user():
     data=request.get_json()
+    print(data)
+    print(type(data))
+    password=data["password"]
+    hashed_password=bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
     cursor.execute(
         "INSERT INTO users (username, password) VALUES (%s, %s)", 
-        (data["username"], data["password"])
+        (data["username"], hashed_password)
     )
 
     users_db.commit()
@@ -26,7 +31,7 @@ def add_user():
 @app.route('/login', methods=['POST'])
 def search_user():
     data=request.get_json()
-
+    password=data["password"]
     cursor.execute(
     "SELECT * FROM users WHERE username = %s",
     (data["username"],)
@@ -37,7 +42,10 @@ def search_user():
     if not user:
         return jsonify({"error": "user not found"}), 404
 
-    if user["password"] !=data["password"]:
+    if not bcrypt.checkpw(
+        password.encode(),
+        user["password"].encode()
+        ):
         return jsonify({"error": "wrong password"}), 403
     
     payload = {
@@ -50,12 +58,18 @@ def search_user():
 #TASK    
 @app.route("/tasks", methods=['POST'])
 def add_task():
-    user_id=get_user_id()
+    user_id = get_user_id()
+
+    if type(user_id) != int:
+        return user_id
+
     body = request.get_json()
+
     cursor.execute(
-        "INSERT INTO task (title, user_id) VALUES (%s, %s)",
+        "INSERT INTO task (title, users_id) VALUES (%s, %s)",
         (body["title"], user_id)
     )
+
     users_db.commit()
 
     return jsonify({"message": "task created"}), 201
@@ -65,7 +79,7 @@ def get_tasks():
     request.headers.get("Authorization")
     user_id=get_user_id()
     cursor.execute(
-        "SELECT * FROM task WHERE user_id = %s",
+        "SELECT * FROM task WHERE users_id = %s",
         (user_id,)
     )
     tasks = cursor.fetchall()
