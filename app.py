@@ -76,7 +76,6 @@ def add_task():
 
 @app.route("/tasks", methods=['GET' ])
 def get_tasks():
-    request.headers.get("Authorization")
     user_id=get_user_id()
     cursor.execute(
         "SELECT * FROM task WHERE users_id = %s",
