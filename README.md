@@ -1,95 +1,267 @@
-# Flask Tasks API
+# Flask Task API
 
-Backend REST API built with Flask, MySQL and JWT authentication.
+A simple REST API for task management built with Flask, MySQL, and JWT authentication.
 
-This project was created as backend development practice and includes authentication, protected routes, CRUD operations and database interaction.
-
----
-
-# Features
+## Features
 
 - User registration
 - User login
-- JWT token authentication
-- Protected routes using Authorization header
-- Create tasks for authorized users
-- Get tasks only for current user
+- JWT authentication
+- Password hashing with bcrypt
+- Create tasks
+- Get user tasks
 - Update tasks
 - Delete tasks
-- Access control for task ownership
+- Protected routes
 - MySQL database integration
-- Environment variables support with .env
 
 ---
 
-# Technologies Used
+## Tech Stack
 
 - Python
 - Flask
 - MySQL
-- mysql.connector
-- PyJWT
+- JWT (PyJWT)
+- bcrypt
 - python-dotenv
+
+---
+
+## Project Structure
+
+```bash
+project/
+│
+├── app.py
+├── auth.py
+├── db.py
+├── .env
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Installation
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/Retr0287/flask-task-api.git
+cd flask-task-api
+```
+
+### 2. Create virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### 3. Activate virtual environment
+
+Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+### 4. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Environment Variables
+
+Create `.env` file:
+
+```env
+SECRET_KEY=your_secret_key
+```
+
+---
+
+## Database Setup
+
+Example MySQL tables:
+
+```sql
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255),
+    password VARCHAR(255)
+);
+
+CREATE TABLE task (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255),
+    users_id INT
+);
+```
+
+---
+
+## Running the Project
+
+```bash
+python app.py
+```
+
+Server starts on:
+
+```bash
+http://127.0.0.1:5000
+```
 
 ---
 
 # API Endpoints
 
-## Authentication
+## Register User
 
-### Register User
-POST /register
+### POST `/register`
 
-### Login User
-POST /login
+```json
+{
+  "username": "test",
+  "password": "123456"
+}
+```
 
-Returns JWT token for authorized requests.
+Response:
 
----
-
-## Tasks
-
-### Create Task
-POST /tasks
-
-### Get User Tasks
-GET /tasks
-
-### Update Task
-PATCH /tasks/<task_id>
-
-Allows updating task title only for task owner.
-
-### Delete Task
-DELETE /task/<task_id>
-
-Allows deleting tasks only for task owner.
+```json
+{
+  "user": "added"
+}
+```
 
 ---
 
-# Authorization
+## Login User
 
-Protected routes require JWT token in Authorization header:
+### POST `/login`
 
-bash Authorization: Bearer your_token 
+```json
+{
+  "username": "test",
+  "password": "123456"
+}
+```
+
+Response:
+
+```json
+{
+  "token": "your_jwt_token"
+}
+```
 
 ---
 
-# Project Structure
+# Protected Routes
 
-bash app.py              # Main Flask application requirements.txt    # Project dependencies README.md           # Documentation .env                # Environment variables 
+Add JWT token to headers:
+
+```http
+Authorization: Bearer your_token
+```
 
 ---
 
-# Learning Goals
+## Create Task
 
-This project was built to practice:
+### POST `/tasks`
 
-- REST API development
-- Flask backend fundamentals
-- JWT authentication
-- CRUD operations
-- MySQL integration
-- Protected routes
-- User authorization logic
-- Git & GitHub workflow
+```json
+{
+  "title": "Learn Flask"
+}
+```
+
+Response:
+
+```json
+{
+  "message": "task created"
+}
+```
+
+---
+
+## Get Tasks
+
+### GET `/tasks`
+
+Response:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Learn Flask",
+    "users_id": 1
+  }
+]
+```
+
+---
+
+## Update Task
+
+### PATCH `/tasks/<task_id>`
+
+```json
+{
+  "title": "Learn Flask API"
+}
+```
+
+---
+
+## Delete Task
+
+### DELETE `/task/<task_id>`
+
+Response:
+
+```json
+{
+  "same tasks": "task was deleted"
+}
+```
+
+---
+
+# Security
+
+- Passwords are hashed using bcrypt
+- JWT tokens protect private routes
+- Users can only modify their own tasks
+
+---
+
+# Future Improvements
+
+- SQLAlchemy ORM
+- Docker support
+- Refresh tokens
+- Input validation
+- Unit tests
+- Pagination
+- Task status (completed/not completed)
+
+---
+
+# Author
+
+GitHub: https://github.com/Retr0287
