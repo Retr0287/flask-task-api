@@ -13,8 +13,10 @@ SECRET_KEY=os.getenv("SECRET_KEY")
 @app.route("/register", methods=['POST'])
 def add_user():
     data=request.get_json()
-    print(data)
-    print(type(data))
+    if not data:
+        return jsonify({"error": "json required"}), 400
+    if "username" not in data or "password" not in data:
+        return jsonify({"error": "username and password required"}), 400
     password=data["password"]
     hashed_password=bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
@@ -31,6 +33,10 @@ def add_user():
 @app.route('/login', methods=['POST'])
 def search_user():
     data=request.get_json()
+    if not data:
+        return jsonify({"error": "json required"}), 400
+    if "username" not in data or "password" not in data:
+        return jsonify({"error": "username and password required"}), 400
     password=data["password"]
     cursor.execute(
     "SELECT * FROM users WHERE username = %s",
@@ -62,24 +68,19 @@ def add_task():
 
     if type(user_id) != int:
         return user_id
-
-    body = request.get_json()
-
     
-
-    cursor.execute(
-        "INSERT INTO task (title, users_id) VALUES (%s, %s)",
-        (body["title"], user_id)
-    )
-
-
-    users_db.commit()
-
+    body = request.get_json()
+    
     if "title" not in body:
         return jsonify({"error": "title required"}), 400
 
     if not body["title"].strip():
         return jsonify({"error": "title cannot be empty"}), 400
+    cursor.execute(
+        "INSERT INTO task (title, users_id) VALUES (%s, %s)",
+        (body["title"], user_id)
+    )
+    users_db.commit()
 
     return jsonify({"message": "task created"}), 201
 
