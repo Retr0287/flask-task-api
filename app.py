@@ -27,7 +27,7 @@ def add_user():
 
     users_db.commit()
 
-    return jsonify({"user":"added"}), 201
+    return jsonify({"message": "user created"}), 201
 
 #LOGIN
 @app.route('/login', methods=['POST'])
@@ -106,7 +106,7 @@ def delete_tasks(task_id):
 
     cursor.execute("DELETE FROM task WHERE id=%s", (task_id,))
     users_db.commit()
-    return jsonify({"same tasks":"task was deleted"}), 200
+    return jsonify({"message": "task deleted"}), 200
 
 @app.route("/tasks/<int:task_id>", methods=['PATCH'])
 def update_tasks(task_id):
@@ -126,7 +126,7 @@ def update_tasks(task_id):
     "UPDATE task SET title = %s WHERE id=%s",
     (body["title"], task_id))
     users_db.commit()
-    return jsonify({"success": "title updated"}), 200
+    return jsonify({"message": "task updated"}), 200
 
         
 if __name__ == "__main__": 
