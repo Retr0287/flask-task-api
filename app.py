@@ -13,8 +13,10 @@ SECRET_KEY=os.getenv("SECRET_KEY")
 @app.route("/register", methods=['POST'])
 def add_user():
     data=request.get_json()
-    print(data)
-    print(type(data))
+    if not data:
+        return jsonify({"error": "json required"}), 400
+    if "username" not in data or "password" not in data:
+        return jsonify({"error": "username and password required"}), 400
     password=data["password"]
     hashed_password=bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
@@ -25,12 +27,16 @@ def add_user():
 
     users_db.commit()
 
-    return jsonify({"user":"added"}), 201
+    return jsonify({"message": "user created"}), 201
 
 #LOGIN
 @app.route('/login', methods=['POST'])
 def search_user():
     data=request.get_json()
+    if not data:
+        return jsonify({"error": "json required"}), 400
+    if "username" not in data or "password" not in data:
+        return jsonify({"error": "username and password required"}), 400
     password=data["password"]
     cursor.execute(
     "SELECT * FROM users WHERE username = %s",
@@ -62,21 +68,24 @@ def add_task():
 
     if type(user_id) != int:
         return user_id
-
+    
     body = request.get_json()
+    
+    if "title" not in body:
+        return jsonify({"error": "title required"}), 400
 
+    if not body["title"].strip():
+        return jsonify({"error": "title cannot be empty"}), 400
     cursor.execute(
         "INSERT INTO task (title, users_id) VALUES (%s, %s)",
         (body["title"], user_id)
     )
-
     users_db.commit()
 
     return jsonify({"message": "task created"}), 201
 
 @app.route("/tasks", methods=['GET' ])
 def get_tasks():
-    request.headers.get("Authorization")
     user_id=get_user_id()
     cursor.execute(
         "SELECT * FROM task WHERE users_id = %s",
@@ -97,7 +106,7 @@ def delete_tasks(task_id):
 
     cursor.execute("DELETE FROM task WHERE id=%s", (task_id,))
     users_db.commit()
-    return jsonify({"same tasks":"task was deleted"}), 200
+    return jsonify({"message": "task deleted"}), 200
 
 @app.route("/tasks/<int:task_id>", methods=['PATCH'])
 def update_tasks(task_id):
@@ -117,7 +126,7 @@ def update_tasks(task_id):
     "UPDATE task SET title = %s WHERE id=%s",
     (body["title"], task_id))
     users_db.commit()
-    return jsonify({"success": "title updated"}), 200
+    return jsonify({"message": "task updated"}), 200
 
         
 if __name__ == "__main__": 
