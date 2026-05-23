@@ -65,12 +65,21 @@ def add_task():
 
     body = request.get_json()
 
+    
+
     cursor.execute(
         "INSERT INTO task (title, users_id) VALUES (%s, %s)",
         (body["title"], user_id)
     )
 
+
     users_db.commit()
+
+    if "title" not in body:
+        return jsonify({"error": "title required"}), 400
+
+    if not body["title"].strip():
+        return jsonify({"error": "title cannot be empty"}), 400
 
     return jsonify({"message": "task created"}), 201
 
