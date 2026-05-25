@@ -32,6 +32,8 @@ This project was created as a learning backend application focused on authentica
 ---
 
 # Project Structure
+
+```bash
 task_api/
 │
 ├── routes/
@@ -49,6 +51,7 @@ task_api/
 ├── app.py
 ├── requirements.txt
 └── .env
+```
 
 ---
 
@@ -57,18 +60,27 @@ task_api/
 ## Authentication
 
 ### Register
+
+```http
 POST /register
+```
 
 Body:
+
+```json
 {
   "username": "test",
   "password": "123456"
 }
+```
 
 ---
 
 ### Login
+
+```http
 POST /login
+```
 
 Returns JWT token.
 
@@ -77,48 +89,78 @@ Returns JWT token.
 # Tasks
 
 ## Create Task
+
+```http
 POST /tasks
+```
 
 Headers:
+
+```http
 Authorization: YOUR_TOKEN
+```
 
 Body:
+
+```json
 {
   "title": "Learn Flask"
 }
+```
 
 ---
 
 ## Get Tasks
+
+```http
 GET /tasks
+```
 
 ---
 
 ## Update Task
+
+```http
 PATCH /tasks/<task_id>
+```
 
 ---
 
 ## Delete Task
+
+```http
 DELETE /task/<task_id>
+```
 
 ---
 
 # Installation
 
 Clone repository:
+
+```bash
 git clone https://github.com/Retr0287/flask-task-api.git
+```
 
 Install dependencies:
+
+```bash
 pip install -r requirements.txt
+```
 
-Create .env file:
+Create `.env` file:
+
+```env
 SECRET_KEY=your_secret_key
+```
 
-Configure MySQL database in db.py.
+Configure MySQL database in `db.py`.
 
 Run server:
+
+```bash
 python app.py
+```
 
 ---
 
