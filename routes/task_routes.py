@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from db import cursor, users_db
-from auth import get_user_id
+from task_api.auth import get_user_id
+from decorators.auth_decorator import login_required
 
 task_bp=Blueprint("task", __name__)
 #TASK    
 @task_bp.route("/tasks", methods=['POST'])
+@login_required
 def add_task():
     user_id = get_user_id()
 
@@ -39,6 +41,7 @@ def get_tasks():
     return jsonify(tasks), 200
 
 @task_bp.route("/tasks/<int:task_id>", methods=['DELETE'])
+@login_required
 def delete_tasks(task_id):
     user_id=get_user_id()
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
@@ -53,6 +56,7 @@ def delete_tasks(task_id):
     return jsonify({"message": "task deleted"}), 200
 
 @task_bp.route("/tasks/<int:task_id>", methods=['PATCH'])
+@login_required
 def update_tasks(task_id):
     user_id=get_user_id()
     body = request.get_json()
