@@ -1,27 +1,17 @@
 from flask import Blueprint, request, jsonify
 from db import cursor, users_db
-from task_api.auth import get_user_id
 from decorators.auth_decorator import login_required
-
+from utils.validators import validate_task
 task_bp=Blueprint("task", __name__)
 #TASK    
 @task_bp.route("/tasks", methods=['POST'])
 @login_required
 def add_task():
-    user_id = get_user_id()
-
-    if type(user_id) != int:
-        return user_id
-    
     body = request.get_json()
-    if not body:
-        return jsonify({"error": "json required"}), 400
-    
-    if "title" not in body:
-        return jsonify({"error": "title required"}), 400
-
-    if not body["title"].strip():
-        return jsonify({"error": "title cannot be empty"}), 400
+    error = validate_task(body)
+    if error:
+        return error
+    user_id = request.user_id 
     cursor.execute(
         "INSERT INTO task (title, users_id) VALUES (%s, %s)",
         (body["title"], user_id)
@@ -32,7 +22,7 @@ def add_task():
 
 @task_bp.route("/tasks", methods=['GET' ])
 def get_tasks():
-    user_id=get_user_id()
+    user_id=request.user_id
     cursor.execute(
         "SELECT * FROM task WHERE users_id = %s",
         (user_id,)
@@ -43,7 +33,7 @@ def get_tasks():
 @task_bp.route("/tasks/<int:task_id>", methods=['DELETE'])
 @login_required
 def delete_tasks(task_id):
-    user_id=get_user_id()
+    user_id=request.user_id
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
     task=cursor.fetchone()
     if not task:
@@ -58,10 +48,11 @@ def delete_tasks(task_id):
 @task_bp.route("/tasks/<int:task_id>", methods=['PATCH'])
 @login_required
 def update_tasks(task_id):
-    user_id=get_user_id()
+    user_id=request.user_id
     body = request.get_json()
-    if not body:
-        return jsonify({"error": "json required"}), 400
+    error=validate_task(body)
+    if error:
+        return error
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
     task=cursor.fetchone()
     if not task:
