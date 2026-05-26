@@ -3,10 +3,15 @@ from flask import jsonify
 def validate_task(body):
 
     if not body:
-        return jsonify({"error": "json required"}), 400
+        return None,(jsonify({"error": "json required"}), 400)
 
     if "title" not in body:
-        return jsonify({"error": "title required"}), 400
+        return None, (jsonify({"error": "title required"}), 400)
+    title=body["title"].strip()   
 
     if not body["title"].strip():
-        return jsonify({"error": "title cannot be empty"}), 400
+        return None, (jsonify({"error": "title cannot be empty"}), 400)
+    
+    return{
+        "title":title
+    }, None

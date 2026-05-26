@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from db import cursor, users_db
 from decorators.auth_decorator import login_required
 from utils.validators import validate_task
+from services.task_service import create_task, get_user_tasks
 task_bp=Blueprint("task", __name__)
 #TASK    
 @task_bp.route("/tasks", methods=['POST'])
@@ -12,22 +13,14 @@ def add_task():
     if error:
         return error
     user_id = request.user_id 
-    cursor.execute(
-        "INSERT INTO task (title, users_id) VALUES (%s, %s)",
-        (body["title"], user_id)
-    )
-    users_db.commit()
+    create_task(body["title"], user_id)
 
     return jsonify({"message": "task created"}), 201
 
 @task_bp.route("/tasks", methods=['GET' ])
 def get_tasks():
     user_id=request.user_id
-    cursor.execute(
-        "SELECT * FROM task WHERE users_id = %s",
-        (user_id,)
-    )
-    tasks = cursor.fetchall()
+    tasks = get_user_tasks(user_id)
     return jsonify(tasks), 200
 
 @task_bp.route("/tasks/<int:task_id>", methods=['DELETE'])
