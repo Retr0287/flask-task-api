@@ -3,7 +3,7 @@ from db import cursor, users_db
 from decorators.auth_decorator import login_required
 from utils.validators import validate_task
 from services.task_service import create_task, get_user_tasks
-from exceptions.api_exeptions import NotFoundError
+from exceptions.api_exeptions import NotFoundError, ForbiddenError, ValidationError
 task_bp=Blueprint("task", __name__)
 #TASK    
 @task_bp.route("/tasks", methods=['POST'])
@@ -33,7 +33,7 @@ def delete_tasks(task_id):
     if not task:
         raise NotFoundError("task not found")
     if task["user_id"]!=user_id:
-        return jsonify ({"error": "access denied"}), 403
+        raise ForbiddenError("accses denied")
 
     cursor.execute("DELETE FROM task WHERE id=%s", (task_id,))
     users_db.commit()
@@ -52,10 +52,10 @@ def update_tasks(task_id):
     if not task:
         raise NotFoundError("task not found")
     if task["user_id"]!=user_id:
-        return jsonify ({"error": "access denied"}), 403
+        raise ForbiddenError("accses denied")
 
     if "title" not in  body:
-        return jsonify({"error": "title required"}), 400
+        raise ValidationError("title required")
     
     cursor.execute(
     "UPDATE task SET title = %s WHERE id=%s",
