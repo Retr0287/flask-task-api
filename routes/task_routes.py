@@ -3,6 +3,7 @@ from db import cursor, users_db
 from decorators.auth_decorator import login_required
 from utils.validators import validate_task
 from services.task_service import create_task, get_user_tasks
+from exceptions.api_exeptions import NotFoundError
 task_bp=Blueprint("task", __name__)
 #TASK    
 @task_bp.route("/tasks", methods=['POST'])
@@ -30,7 +31,7 @@ def delete_tasks(task_id):
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
     task=cursor.fetchone()
     if not task:
-        return jsonify ({"error": "task not found"}), 404
+        raise NotFoundError("task not found")
     if task["user_id"]!=user_id:
         return jsonify ({"error": "access denied"}), 403
 
@@ -49,7 +50,7 @@ def update_tasks(task_id):
     cursor.execute("SELECT * FROM task WHERE id=%s", (task_id,))
     task=cursor.fetchone()
     if not task:
-        return jsonify ({"error": "task not found"}), 404
+        raise NotFoundError("task not found")
     if task["user_id"]!=user_id:
         return jsonify ({"error": "access denied"}), 403
 
